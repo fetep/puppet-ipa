@@ -69,15 +69,17 @@ class ipa::server(
 	$service_excludes = [],		# never purge these service excludes...
 	$user_excludes = [],		# never purge these user excludes...
 	$peer_excludes = [],		# never purge these peer excludes...
-	$ensure = present		# TODO: support uninstall with 'absent'
-) {
+	$ensure = present,		# TODO: support uninstall with 'absent'
+
+	# params override
+	$package_python_argparse = $::ipa::params::package_python_argparse,
+) inherits ::ipa::params {
 	$FW = '$FW'			# make using $FW in shorewall easier...
 
 	# TODO: should we always include the replica peering or only when used?
 	include ipa::server::replica::peering
 	include ipa::server::replica::master
 	include ipa::common
-	include ipa::params
 	include ipa::vardir
 	#$vardir = $::ipa::vardir::module_vardir	# with trailing slash
 	$vardir = regsubst($::ipa::vardir::module_vardir, '\/$', '')
@@ -202,9 +204,9 @@ class ipa::server(
 			before => Package["${::ipa::params::package_ipa_server}"],
 		}
 	}
-	if "${::ipa::params::package_python_argparse}" != '' {
+	if "${package_python_argparse}" != '' {
 		# used by diff.py
-		package { "${::ipa::params::package_python_argparse}":
+		package { "${package_python_argparse}":
 			ensure => present,
 			before => [
 				Package["${::ipa::params::package_ipa_server}"],
